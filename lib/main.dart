@@ -3,6 +3,54 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:async';
+import 'dart:js_interop' as js; // Web環境での音声再生用
+
+// ブラウザ標準のWeb Audio APIを使って木琴風の音を鳴らす関数
+void playXylophoneSound() {
+  try {
+    final jsContext = js.globalContext;
+    final audioCtxClass = jsContext['AudioContext'] ?? jsContext['webkitAudioContext'];
+    if (audioCtxClass == null) return;
+    
+    // ignore: avoid_dynamic_calls
+    final audioCtx = audioCtxClass.callAsConstructor();
+    // ignore: avoid_dynamic_calls
+    final currentTime = audioCtx['currentTime'] as double;
+
+    // 木琴（シロフォン）風の優しく澄んだ高めの音階（ド・ミ・ソ・高ド など）
+    final notes = [523.25, 659.25, 783.99, 1046.50]; 
+    
+    for (int i = 0; i < notes.length; i++) {
+      // ignore: avoid_dynamic_calls
+      final osc = audioCtx.callMethod('createOscillator', []);
+      // ignore: avoid_dynamic_calls
+      final gainNode = audioCtx.callMethod('createGain', []);
+
+      // 木琴らしい硬質かつあたたかい「sine（正弦波）」を使用
+      osc['type'] = 'sine';
+      osc['frequency']['value'] = notes[i];
+
+      // 音の減衰（だんだん小さくなるフェードアウト）を設定して木琴の余韻を再現
+      final startTime = currentTime + (i * 0.12);
+      // ignore: avoid_dynamic_calls
+      gainNode['gain'].callMethod('setValueAtTime', [0.3, startTime]);
+      // ignore: avoid_dynamic_calls
+      gainNode['gain'].callMethod('exponentialRampToValueAtTime', [0.001, startTime + 0.35]);
+
+      // ignore: avoid_dynamic_calls
+      osc.callMethod('connect', [gainNode]);
+      // ignore: avoid_dynamic_calls
+      gainNode.callMethod('connect', [audioCtx['destination']]);
+
+      // ignore: avoid_dynamic_calls
+      osc.callMethod('start', [startTime]);
+      // ignore: avoid_dynamic_calls
+      osc.callMethod('stop', [startTime + 0.4]);
+    }
+  } catch (e) {
+    debugPrint('音声再生エラー: $e');
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -146,7 +194,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   List<MissionItem> missions = [];
-  String? hoveredMissionId; // マウスホバー中のミッションID
+  String? hoveredMissionId;
 
   Timer? _timer;
   int _initialSeconds = 25 * 60;
@@ -219,6 +267,10 @@ class _DashboardPageState extends State<DashboardPage> {
       setState(() {
         if (_remainingSeconds > 0) {
           _remainingSeconds--;
+          // 残り0秒になった瞬間に木琴の音を鳴らす
+          if (_remainingSeconds == 0) {
+            playXylophoneSound();
+          }
         } else {
           _timer?.cancel();
           _isTimerRunning = false;
@@ -505,7 +557,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           title: const Text('今日を終了しますか？',
               style: TextStyle(fontWeight: FontWeight.bold)),
-          content: const Text('今日一日の頑張りを振り返りましょう💭'),
+          content: const Text('今日一日の頑張りを振り返ろう💭'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -650,10 +702,11 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
 
+          // 縦向きのテーマカラー選択パレット
           Positioned(
             left: 20,
             bottom: 20,
-            child: _buildFloatingColorThemePicker(),
+            child: _buildVerticalColorThemePicker(),
           ),
 
           Positioned(
@@ -681,7 +734,8 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildFloatingColorThemePicker() {
+  // 縦向きテーマカラーピッカー
+  Widget _buildVerticalColorThemePicker() {
     final colors = [
       const Color(0xFFF472B6),
       const Color(0xFF38BDF8),
@@ -690,7 +744,7 @@ class _DashboardPageState extends State<DashboardPage> {
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -702,7 +756,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: colors.map((color) {
           bool isSelected =
@@ -710,7 +764,7 @@ class _DashboardPageState extends State<DashboardPage> {
           return GestureDetector(
             onTap: () => widget.onChangeTheme(color),
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
+              margin: const EdgeInsets.symmetric(vertical: 4),
               width: 26,
               height: 26,
               decoration: BoxDecoration(
@@ -953,7 +1007,7 @@ class _DashboardPageState extends State<DashboardPage> {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               transform: isHovered
-                  ? (Matrix4.identity()..translate(0, -6, 0)) // 浮き出るアニメーション
+                  ? (Matrix4.identity()..translate(0, -6, 0))
                   : Matrix4.identity(),
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
@@ -1138,13 +1192,11 @@ class _DashboardPageState extends State<DashboardPage> {
                   final RenderBox? box = context.findRenderObject() as RenderBox?;
                   if (box == null) return;
 
-                  // 24時間スケジュール上の角度判定
                   final center = const Offset(120, 120);
                   final dx = event.localPosition.dx - center.dx;
                   final dy = event.localPosition.dy - center.dy;
 
                   final distance = sqrt(dx * dx + dy * dy);
-                  // 円環のヒット範囲判定
                   if (distance < 70 || distance > 120) {
                     if (hoveredMissionId != null) {
                       setState(() => hoveredMissionId = null);
@@ -1152,7 +1204,6 @@ class _DashboardPageState extends State<DashboardPage> {
                     return;
                   }
 
-                  // 角度(ラジアン)から時間(0〜24)へ変換
                   double angle = atan2(dy, dx) + pi / 2;
                   if (angle < 0) angle += 2 * pi;
                   double hoveredHour = (angle / (2 * pi)) * 24;
@@ -1211,7 +1262,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   const Text('⏱️ ', style: TextStyle(fontSize: 18)),
                   Text(
-                    'タイマー',
+                    '集中タイマー',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
