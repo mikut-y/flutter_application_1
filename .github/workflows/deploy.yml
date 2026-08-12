@@ -1,0 +1,23 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - run: flutter build web --base-href "/flutter_application_1/"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'build/web'
+
+      - uses: actions/deploy-pages@v4
