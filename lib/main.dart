@@ -54,7 +54,7 @@ class _ScheduleAppState extends State<ScheduleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'マイ スケジュール',
+      title: 'MY SCHEDULE',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -189,7 +189,7 @@ class _DashboardPageState extends State<DashboardPage> {
       missions = [
         MissionItem(
           id: '1',
-          title: '☕ 今日のメインタスク',
+          title: '今日のメインタスク',
           startHour: 10.0,
           endHour: 12.0,
           progress: 0.0,
@@ -258,7 +258,7 @@ class _DashboardPageState extends State<DashboardPage> {
             controller: controller,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              labelText: '分数（分）を入力',
+              labelText: '分数を入力',
               hintText: '例: 25',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -358,7 +358,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       controller: titleController,
                       decoration: InputDecoration(
                         labelText: '目標の内容',
-                        hintText: '例: 📚 勉強、読書など',
+                        hintText: '例: 勉強、読書など',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -368,7 +368,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('時間設定:'),
+                        const Text('時刻設定:'),
                         OutlinedButton(
                           onPressed: () async {
                             final picked = await showTimePicker(
@@ -405,7 +405,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         const Text('達成度の管理方法:',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         ListTile(
-                          title: const Text('メーター（%で調整）'),
+                          title: const Text('メーター'),
                           leading: Radio<MissionType>(
                             value: MissionType.meter,
                             groupValue: selectedType,
@@ -421,7 +421,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           },
                         ),
                         ListTile(
-                          title: const Text('チェックボックス（完了/未完了）'),
+                          title: const Text('チェックボックス'),
                           leading: Radio<MissionType>(
                             value: MissionType.checkbox,
                             groupValue: selectedType,
@@ -505,11 +505,11 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           title: const Text('今日を終了しますか？',
               style: TextStyle(fontWeight: FontWeight.bold)),
-          content: const Text('今日一日の頑張りを振り返りましょう♪'),
+          content: const Text('今日一日の頑張りを振り返りましょう💭'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('まだつづける', style: TextStyle(color: Colors.grey)),
+              child: const Text('まだ続ける', style: TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -540,7 +540,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           title: const Text('全消去しますか？',
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
-          content: const Text('登録した目標がすべて消えます。'),
+          content: const Text('登録した目標がすべて消えます'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -586,13 +586,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
     String message = '';
     if (percent <= 50) {
-      message = '今日もお疲れ様！少しでも前進できたのが偉いよ♪ 明日またマイペースにがんばろ！';
+      message = '今日もお疲れ様！少しでも前進できたのが偉いよ、明日からもがんばろ！';
     } else if (percent <= 80) {
-      message = '半分以上も達成できたね！すごい！しっかり体を休めてね✨';
+      message = '半分以上も達成できたね！すごい！しっかり体を休めてね🤍';
     } else if (percent <= 99) {
-      message = 'あと一歩のところまでクリア！本当によく頑張ったね、誇っていいよ！🌸';
+      message = 'ほとんどクリア！本当によく頑張ったね、誇っていいよ！お疲れ様☕️';
     } else {
-      message = 'パーフェクト達成おめでとう！！完璧すぎるよ！今日は自分を思いっきり褒めてあげてね🎉';
+      message = 'パーフェクト達成おめでとう！！完璧すぎるよ！今日は自分を思いっきり褒めてあげてね💖';
     }
 
     return {'icon': icon, 'name': charName, 'message': message};
@@ -761,7 +761,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
                   const Text(
-                    '今日のおつかれさまメッセージ',
+                    '今日の一言メッセージ',
                     style: TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],
@@ -810,7 +810,7 @@ class _DashboardPageState extends State<DashboardPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '✨ 本日のダッシュボード ✨',
+            'MY SCHEDULE 🤍',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -820,7 +820,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           const SizedBox(height: 4),
           const Text(
-            'メリハリをつけてクリアしよう〜！👑',
+            '今日の目標を可視化してゴールを目指そう！',
             style: TextStyle(fontSize: 13, color: Colors.grey),
           ),
         ],
@@ -902,7 +902,7 @@ class _DashboardPageState extends State<DashboardPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '📑 本日のミッション一覧',
+              '📑 今日の目標',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -1211,7 +1211,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   const Text('⏱️ ', style: TextStyle(fontSize: 18)),
                   Text(
-                    '集中タイマー',
+                    'タイマー',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
